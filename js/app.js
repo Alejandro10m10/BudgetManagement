@@ -12,6 +12,8 @@ function init(){
 
 function evenListeners(){
     document.addEventListener('DOMContentLoaded', preguntarPresupuesto);
+
+    formulario.addEventListener('submit', agregarGasto);
 }
 
 
@@ -34,6 +36,27 @@ class UI{
         document.querySelector('#total').textContent = presupuesto;
         document.querySelector('#restante').textContent = restante;
     }
+
+    imprimirAlerta(mensaje, tipo){
+        // Crear el div
+        const divMensaje = document.createElement('div');
+        divMensaje.classList.add('text-center', 'alert');
+
+        (tipo === 'error')
+            ? divMensaje.classList.add('alert-danger')
+            : divMensaje.classList.add('alert-success');
+
+        // Mensaje de error
+        divMensaje.textContent = mensaje;
+
+        // Insertar ern el HTML
+        document.querySelector('.primario').insertBefore(divMensaje, formulario);
+
+        // Quitar el HTML
+        setTimeout(() => {
+            divMensaje.remove();
+        }, 3000);
+    }
 }
 
 // Instanciar clases
@@ -43,7 +66,8 @@ const ui = new UI();
 // Funciones
 
 function preguntarPresupuesto(){
-    const presupuestoUsuario = prompt('¿Cual es tu presupuesto?');
+    //const presupuestoUsuario = prompt('¿Cual es tu presupuesto?');
+    const presupuestoUsuario = 500;
 
     if(presupuestoUsuario === '' || presupuestoUsuario === null || isNaN(presupuestoUsuario) || presupuestoUsuario <= 0){
         window.location.reload();
@@ -52,4 +76,21 @@ function preguntarPresupuesto(){
     presupuesto = new Presupuesto(presupuestoUsuario);
 
     ui.insertarPresupuesto(presupuesto);
+}
+
+function agregarGasto(e){
+    e.preventDefault();
+
+    // Leer los datos del formulario
+    const nombre = document.querySelector('#gasto').value;
+    const cantidad = document.querySelector('#cantidad').value;
+
+    if(nombre === '' || cantidad === ''){
+        ui.imprimirAlerta('Ambos campos son obligatorios', 'error');
+        return;
+    } else if(cantidad <= 0 || isNaN(cantidad)){
+        ui.imprimirAlerta('Cantidad no válida', 'error');
+        return;
+    }   
+    
 }
