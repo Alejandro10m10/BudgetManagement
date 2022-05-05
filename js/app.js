@@ -28,6 +28,12 @@ class Presupuesto{
 
     nuevoGasto(gasto){
         this.gastos = [...this.gastos, gasto];
+        this.calcularRestante();
+    }
+
+    calcularRestante(){
+        const gastado = this.gastos.reduce( (total, gasto) => total + gasto.cantidad, 0);
+        this.restante = this.presupuesto - gastado;
     }
 }
 
@@ -76,7 +82,7 @@ class UI{
             nuevoGasto.dataset.id = id;
 
             // Agregar el HTML del gasto
-            nuevoGasto.innerHTML = `${nombre} <span class='badge badge-primary badge-pill'> ${cantidad} </span>`;
+            nuevoGasto.innerHTML = `${nombre} <span class='badge badge-primary badge-pill'> $ ${cantidad} </span>`;
 
             // Boton para borrar el gasto
 
@@ -94,6 +100,32 @@ class UI{
     limpiarHTML(){
         while(gastoListado.firstChild){
             gastoListado.removeChild(gastoListado.firstChild);
+        }
+    }
+
+    actualizarRestante(restante){
+        document.querySelector('#restante').textContent = restante;
+    }
+
+    comprobarPresupuesto(presupuestoObj){
+        const {presupuesto, restante} = presupuestoObj;
+
+        const restanteDiv = document.querySelector('.restante');
+
+        // Comprobar 25%
+        if( (presupuesto / 4 ) > restante ){
+            restanteDiv.classList.remove('alert-success', 'alert-warning');
+            restanteDiv.classList.add('alert-danger');
+        } else if( (presupuesto / 2 ) > restante ){
+            restanteDiv.classList.remove('alert-success');
+            restanteDiv.classList.add('alert-warning');
+        }
+
+        // Si el total es 0 o menor
+        if(restante <= 0){
+            ui.imprimirAlerta('El presupuesto se ha agotado', 'error');
+
+            formulario.querySelector('button[type="submit"]').disabled = true;
         }
     }
     
@@ -143,8 +175,10 @@ function agregarGasto(e){
     ui.imprimirAlerta('Gasto agregado correctamente');
 
     // Imprimir los gastos
-    const {gastos} = presupuesto;
+    const {gastos, restante} = presupuesto;
     ui.agregarGastoListado(gastos);
+    ui.actualizarRestante(restante);
+    ui.comprobarPresupuesto(presupuesto);
 
     // Reinicia el formulario
     formulario.reset();
